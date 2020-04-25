@@ -91,7 +91,7 @@ namespace RNumber
             }
             else
             {
-                //Console.WriteLine("Invalid input");
+                throw new FormatException("Incorrect number input.");
             }
         }
 
@@ -181,30 +181,14 @@ namespace RNumber
 
         public override string ToString()
         {
-            if (this.n == 0)
+            int tempN = n * sign;
+
+            if (m == 1 || n == 0)
             {
-                return "0";
+                return Convert.ToString(tempN);
             }
 
-            string result;
-
-            if (this.sign < 0)
-            {
-                result = "-";
-            }
-            else
-            {
-                result = "";
-            }
-            if (this.n == this.m)
-            {
-                return result + "1";
-            }
-            if (this.m == 1)
-            {
-                return result + this.n;
-            }
-            return result + this.n + "/" + this.m;
+            return Convert.ToString(tempN + "/" + m);
         }
 
         public override int GetHashCode() => this.GetHashCode();
@@ -212,20 +196,8 @@ namespace RNumber
         public static RationalNumber operator +(RationalNumber num1, RationalNumber num2) => 
             SelectOperation(num1, num2, (x, y) => x + y);
 
-        public static RationalNumber operator +(RationalNumber R_num, int I_num) =>
-            R_num + new RationalNumber(I_num);
-
-        public static RationalNumber operator +(int I_num, RationalNumber R_num) =>
-            R_num + new RationalNumber(I_num);
-
         public static RationalNumber operator -(RationalNumber num1, RationalNumber num2) =>
             SelectOperation(num1, num2, (x, y) => x - y);
-
-        public static RationalNumber operator -(RationalNumber R_num, int I_num) =>
-            R_num - new RationalNumber(I_num);
-
-        public static RationalNumber operator -(int I_num, RationalNumber R_num) =>
-            new RationalNumber(I_num) - R_num;
 
         public static RationalNumber operator *(RationalNumber num1, RationalNumber num2) =>
             new RationalNumber(num1.n * num1.sign * num2.n * num2.sign, num1.m * num2.m);

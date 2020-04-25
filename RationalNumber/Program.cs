@@ -10,14 +10,24 @@ namespace RNumber
             int num_i = 23;
             double num_d = 3.5;
 
-            var numbers = new List<RationalNumber>()
+            List<RationalNumber> numbers = null;
+
+            try
             {
+                numbers = new List<RationalNumber>()
+                {
                 new RationalNumber("-6,5"),
                 new RationalNumber("4/5"),
                 new RationalNumber(12),
                 new RationalNumber("1/20"),
                 new RationalNumber(0.5)
-            };
+                };
+            }
+            catch(FormatException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return;
+            }
 
             numbers.Sort();
 
@@ -41,7 +51,7 @@ namespace RNumber
             );
 
             Console.WriteLine($@"
-            In different formats: (fraction) {numbers[3]}, (int) {(int)numbers[3]}, (double) {(double)numbers[3]}");
+            In different formats: (fraction) {numbers[0]}, (int) {(int)numbers[0]}, (double) {(double)numbers[0]}");
         }
     }
 }
