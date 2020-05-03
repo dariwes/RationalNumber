@@ -7,8 +7,8 @@ namespace RNumber
     {
         static void Main(string[] args)
         {
-            int num_i = 23;
-            double num_d = 3.5;
+            int numI = 23;
+            double numD = 3.5;
 
             List<RationalNumber> numbers = null;
 
@@ -16,10 +16,10 @@ namespace RNumber
             {
                 numbers = new List<RationalNumber>()
                 {
-                new RationalNumber("-6,5"),
-                new RationalNumber("4/5"),
+                RationalNumber.Parse("-6,5"),
+                RationalNumber.Parse("4/5"),
                 new RationalNumber(12),
-                new RationalNumber("1/20"),
+                RationalNumber.Parse("1/20"),
                 new RationalNumber(0.5)
                 };
             }
@@ -43,9 +43,9 @@ namespace RNumber
             Addition:
             {numbers[0]} + {numbers[1]} = {numbers[0] + numbers[1]}
             Subtraction:
-            {numbers[2]} - {num_i} = {numbers[2] - (RationalNumber)num_i}
+            {numbers[2]} - {numI} = {numbers[2] - (RationalNumber)numI}
             Multiplication:
-            {numbers[3]} * {num_d} = {numbers[3] * num_d}
+            {numbers[3]} * {numD} = {numbers[3] * (RationalNumber)numD}
             Division:
             {numbers[4]} / {numbers[0]} = {numbers[4] / numbers[0]}"
             );

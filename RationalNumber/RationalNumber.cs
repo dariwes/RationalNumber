@@ -8,91 +8,73 @@ namespace RNumber
 
     class RationalNumber : IEquatable<RationalNumber>, IComparable<RationalNumber>
     {
-        private int n;
-        private int m;
+        private readonly int n;
+        private readonly int m; 
         private int sign = 1;
 
-        public int N 
-        { 
-            get => n;
-            set
-            {
-                if(value < 0)
-                {
-                    sign = -1;
-                }
-                n = Math.Abs(value);
-            }
-        }
-        public int M
-        {
-            get => m;
-            set => m = value < 0 ? 1 : value;
-        }
+        public int N { get; }
+        public int M { get; }
 
         public RationalNumber(int n, int m)
         {
-            N = n;
-            M = m;
+            sign = Math.Sign(n);
+            n = Math.Abs(n);
+
+            int GCD = GreatestCommonDivisor(n, m);
+            this.n = n / GCD;
+            this.m = m / GCD;
         }
 
         public RationalNumber(int n) : this(n, 1) { }
 
 
-        public RationalNumber(double num)
+        public RationalNumber(double number)
         {
+            sign = Math.Sign(number);
+            number = Math.Abs(number);
             m = 1;
 
-            if(num < 0)
+            while (number % 1 != 0)
             {
-                sign = -1;
-                num = Math.Abs(num);
-            }
-
-            while (num % 1 != 0)
-            {
-                num *= 10;
+                number *= 10;
                 m *= 10;
             }
 
-            n = (int)num;
+            n = (int)number;
             int GCD = GreatestCommonDivisor(n, m);
 
             n /= GCD;
             m /= GCD;
         }
 
-        public RationalNumber(string number)
+        public static RationalNumber Parse(string strNumber)
         {
-            if(Regex.Match(number, @"^-*\d+\s*\/\s*\d+$").Success)
-            {
-                string[] digits = Regex.Split(number, @"\D+");
+            RationalNumber number;
 
-                if(number[0] == '-')
-                {
-                    sign = -1;
-                }
-                int.TryParse(digits[0], out n);
-                int.TryParse(digits[1], out m);
-            }
-            else if(Regex.Match(number, @"^-*\d+,\d+$").Success)
+            if (Regex.Match(strNumber, @"^-*\d+\s*\/\s*\d+$").Success)
             {
-                var temp = new RationalNumber(Convert.ToDouble(number));
-                this.N = temp.n;
-                this.M = temp.m;
-                this.sign = temp.sign;
+                string[] digits = Regex.Split(strNumber, @"\D+");
+
+                number = new RationalNumber(Convert.ToInt32(digits[0]), 
+                                            Convert.ToInt32(digits[1]));
             }
-            else if(Regex.Match(number, @"^-*\d+$").Success)
+            else if(Regex.Match(strNumber, @"^-*\d+,\d+$").Success)
             {
-                var temp = new RationalNumber(Convert.ToInt32(number));
-                this.N = temp.n;
-                this.M = temp.m;
-                this.sign = temp.sign;
+                number = new RationalNumber(Convert.ToDouble(strNumber));
+            }
+            else if(Regex.Match(strNumber, @"^-*\d+$").Success)
+            {
+                number = new RationalNumber(Convert.ToInt32(strNumber));
             }
             else
             {
                 throw new FormatException("Incorrect number input.");
             }
+            if (strNumber[0] == '-')
+            {
+                number.sign = -1;
+            }
+            return number;
         }
 
         private static int GreatestCommonDivisor(int num1, int num2)
@@ -109,35 +91,24 @@ namespace RNumber
         private static int LeastCommonMultiple(int num1, int num2) => 
             num1 * num2 / GreatestCommonDivisor(num1, num2);
 
-        public RationalNumber Reduce()
-        {
-            int GCD = GreatestCommonDivisor(this.n, this.m);
-            this.n /= GCD;
-            this.m /= GCD;
-            return this;
-        }
-
         private static RationalNumber SelectOperation(RationalNumber num1, 
                 RationalNumber num2, Operation operation)
         {
             int LCM = LeastCommonMultiple(num1.m, num2.m);
-            int new_n = operation(num1.n * LCM / num1.m * num1.sign,
-                        num2.n * LCM / num2.m * num2.sign);
+            int numerator = operation(num1.n * LCM / num1.m * num1.sign, 
+                num2.n * LCM / num2.m * num2.sign);
 
-            return new RationalNumber(new_n, LCM);
+            return new RationalNumber(numerator, LCM);
         }
 
-        public bool Equals(RationalNumber second_num)
+        public bool Equals(RationalNumber other)
         {
-            if (second_num == null)
+            if (other is null)
             {
                 return false;
             }
 
-            RationalNumber num1 = this.Reduce();
-            RationalNumber num2 = second_num.Reduce();
-
-            if (num1.n == num2.n && num1.m == num2.m)
+            if (this.n == other.n && this.m == other.m)
             {
                 return true;
             }
@@ -147,31 +118,29 @@ namespace RNumber
 
         public override bool Equals(Object obj)
         {
-            if (obj == null)
+            if (obj is null)
             {
                 return false;
             }
 
-            RationalNumber num = obj as RationalNumber;
+            var number = obj as RationalNumber;
 
-            if (num == null)
+            if (number is null)
             {
                 return false;
             }
                 
-            return Equals(num);
+            return Equals(number);
         }
 
-        public int CompareTo(RationalNumber second)
+        public int CompareTo(RationalNumber other)
         {
-            if (this.Equals(second))
+            if (this.Equals(other))
             {
                 return 0;
             }
-            RationalNumber num1 = this.Reduce();
-            RationalNumber num2 = second.Reduce();
 
-            if (num1.n * num1.sign * num2.m > num2.n * num2.sign * num1.m)
+            if (this.n * this.sign * other.m > other.n * other.sign * this.m)
             {
                 return 1;
             }
@@ -181,14 +150,14 @@ namespace RNumber
 
         public override string ToString()
         {
-            int tempN = n * sign;
+            int numerator = n * sign;
 
             if (m == 1 || n == 0)
             {
-                return Convert.ToString(tempN);
+                return Convert.ToString(numerator);
             }
 
-            return Convert.ToString(tempN + "/" + m);
+            return Convert.ToString(numerator + "/" + m);
         }
 
         public override int GetHashCode() => this.GetHashCode();
@@ -205,13 +174,13 @@ namespace RNumber
         public static RationalNumber operator /(RationalNumber num1, RationalNumber num2) =>
             new RationalNumber(num1.n * num1.sign * num2.m * num2.sign, num1.m * num2.n);
 
-        public static RationalNumber operator ++(RationalNumber number) => number + 1;
+        public static RationalNumber operator ++(RationalNumber number) => number + (RationalNumber)1;
 
-        public static RationalNumber operator --(RationalNumber number) => number - 1;
+        public static RationalNumber operator --(RationalNumber number) => number - (RationalNumber)1;
 
         public static bool operator ==(RationalNumber num1, RationalNumber num2)
         {
-            if (((object)num1) == null || ((object)num2) == null)
+            if (((object)num1) is null || ((object)num2) is null)
                 return Object.Equals(num1, num2);
 
             return num1.Equals(num2);
@@ -219,7 +188,7 @@ namespace RNumber
 
         public static bool operator !=(RationalNumber num1, RationalNumber num2)
         {
-            if (((object)num1) == null || ((object)num2) == null)
+            if (((object)num1) is null || ((object)num2) is null)
                 return !Object.Equals(num1, num2);
 
             return !(num1.Equals(num2));
@@ -237,14 +206,25 @@ namespace RNumber
         public static bool operator <=(RationalNumber num1, RationalNumber num2) =>
             num1.CompareTo(num2) <= 0;
 
-        public static implicit operator double(RationalNumber number) => 
-            (double)number.n / number.m;
+        public static explicit operator double(RationalNumber number)
+        {
+            string strNumber  = Convert.ToString(number.n / number.m) + ",";
+            int numerator = number.n;
 
-        public static implicit operator RationalNumber(double number) => 
+            for (int i = 0; i < 16; i++)
+            {
+                numerator = (numerator % number.m) * 10;
+                strNumber += Convert.ToString(numerator / number.m);
+            }
+
+            return Math.Round(Convert.ToDouble(strNumber), 15) * number.sign;
+        }
+
+        public static explicit operator RationalNumber(double number) => 
             new RationalNumber(number);
 
-        public static explicit operator int(RationalNumber number) => 
-            number.n / number.m;
+        public static explicit operator int(RationalNumber number) =>
+            (int)Math.Round((double)number, MidpointRounding.AwayFromZero);
 
         public static explicit operator RationalNumber(int number) => 
             new RationalNumber(number);
